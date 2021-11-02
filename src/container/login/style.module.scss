@@ -1,0 +1,36 @@
+@import "styles/common.scss";
+
+.container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: $bgColor;
+
+    .footer,
+    .content {
+        width: inherit;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .content {
+        flex: 1;
+    }
+
+    .footer {
+        height: 24px;
+    }
+}
+
+
+.formContent {
+    padding: 8px;
+    max-width: 500px;
+    width: 100%;
+
+    .inputStyle {
+        width: 210px;
+    }
+}
