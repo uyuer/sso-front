@@ -13,9 +13,8 @@ import { getToken, getType } from 'utils/util';
 export default function Navigate(props) {
     const history = useHistory();
     const token = getToken();
-    let { logged, logout } = useContext(CommonContext);
+    let { logout } = useContext(CommonContext);
     let {
-        title = true,
         direction = 'horizontal',
         split = '/',
         size = 'small',
@@ -57,13 +56,14 @@ export default function Navigate(props) {
     const splitEle = <span style={navTheme.default}>{split}</span>
     return (
         <div className={classnames(styles.link, className)} style={style}>
+            {/* {title || <span>网站导航：</span>} */}
             <Space {...{ direction, split: splitEle, size }}>
                 {
                     nav.map(item => {
                         if (item.to) {
                             return <NavLink style={navTheme.default} activeStyle={navTheme.active} to={item.to} key={item.name}>{item.name}</NavLink>
                         }
-                        return <a style={navTheme.default} key={item.name} onClick={logoutHandle}>退出</a>
+                        return <button style={navTheme.default} key={item.name} onClick={logoutHandle}>退出</button>
                     })
                 }
             </Space>

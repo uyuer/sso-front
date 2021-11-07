@@ -1,13 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Input, Message, Form, Radio, Button, Row, Col } from 'antd';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { Input, Message, Form, Radio, Button } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import CryptoJS from 'crypto-js';
 import styles from './style.module.scss';
 
 import service from 'service'
 
-import Clock from 'components/Clock';
 import WebsiteName from 'components/WebsiteName';
 import Navigate from 'components/Navigate';
 import Beian from 'components/Beian';
@@ -51,7 +49,7 @@ export default function Register(props) {
     // }, [])
     // 发送验证码
     async function sendCodeHandle(e) {
-        let { validateFields, getFieldValue, setFieldsValue } = formInstance.current;
+        let { validateFields } = formInstance.current;
         let field = await validateFields(['email']);
         // setFieldsValue({ code: undefined })
         if (sending) return;
@@ -113,20 +111,31 @@ export default function Register(props) {
     }
 
     // 倒计时自减
-    function down(count, fn) {
-        if (count <= 0) return;
-        setTimeout(() => {
-            count--;
-            fn(count)
-            down(count, fn)
-        }, 1000)
-    }
+    const down = useCallback(() => {
+        const fn = function (count, fn) {
+            if (count <= 0) return;
+            setTimeout(() => {
+                count--;
+                fn(count)
+                fn(count, fn)
+            }, 1000)
+        }
+        return fn;
+    }, [count])
+    // function down(count, fn) {
+    //     if (count <= 0) return;
+    //     setTimeout(() => {
+    //         count--;
+    //         fn(count)
+    //         down(count, fn)
+    //     }, 1000)
+    // }
 
     useEffect(() => {
         if (start) {
             down(count, setCount)
         }
-    }, [start])
+    }, [start, down, count])
 
     return (
         <div className={styles.container}>

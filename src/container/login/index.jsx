@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
-import { useHistory } from 'react-router-dom';
 import { Input, Message, Form, Button } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import CryptoJS from 'crypto-js';
@@ -10,9 +9,7 @@ import Navigate from 'components/Navigate';
 import Beian from 'components/Beian';
 
 import service from 'service'
-import { setLocalUserInfo } from 'utils/util';
 import CommonContext from 'components/Common/context';
-// import { CommonContext } from 'components/Common';
 
 // // AES加密 加密用户网站密码
 // let ciphertext = CryptoJS.AES.encrypt('123456', '123456').toString();
@@ -43,7 +40,7 @@ const tailLayout = {
 };
 // 登录
 export default function Login(props) {
-    let { logged, setLogged } = useContext(CommonContext);
+    let { loggedChange } = useContext(CommonContext);
     const formInstance = useRef();
     const [loading, setLoading] = useState(false);
     let urlParams = new URLSearchParams(window.location.search);
@@ -59,20 +56,20 @@ export default function Login(props) {
         let params = {
             username,
             password: enCryptPassword,
-            serviceURL,
+            serviceURL: serviceURL ? serviceURL : '',
         }
         if (loading) return;
         setLoading(true);
         service.sso.login(params).then(response => {
             if (response) {
-                setLogged(true)
+                loggedChange(true)
                 Message.success('登录成功, 即将跳转..', 1.5, function () {
-                    let { code, data, message } = response;
+                    let { data } = response;
                     data && (window.location.href = data)
                 });
             }
         }).catch(function (error) {
-            setLogged(false)
+            loggedChange(false)
         }).finally(() => {
             setLoading(false);
         })
@@ -82,13 +79,13 @@ export default function Login(props) {
         let urlParams = new URLSearchParams(window.location.search);
         let serviceURL = urlParams.get('serviceURL');
         service.sso.doLogin({ serviceURL }).then(function (response) {
-            setLogged(true)
-            let { code, data, message } = response;
+            loggedChange(true)
+            let { data } = response;
             data && (window.location.href = data)
         }).catch(function (error) {
-            setLogged(false)
+            loggedChange(false)
         });
-    }, [])
+    }, [loggedChange])
 
     return (
         <div className={styles.container}>

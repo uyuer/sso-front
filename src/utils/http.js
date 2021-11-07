@@ -1,7 +1,6 @@
 import axios from "axios";
 import qs from "qs";
 import { Message } from "antd";
-import config from "../config";
 
 const http = axios.create({
     paramsSerializer: params => qs.stringify(params),
@@ -27,7 +26,6 @@ http.interceptors.request.use(
 );
 http.interceptors.response.use(
     function (response) {
-        console.log('process.env.ServerUrl', config.serverUrl)
         if (response.status == 200) {
             return response.data
         }
@@ -44,7 +42,7 @@ http.interceptors.response.use(
             if (code === 401) {
                 window.localStorage.removeItem('token')
                 return Message.error('用户未登录, 请先登录', 1.5, function () {
-                    return window.location.href = `${config.serverUrl || ''}/login`
+                    return window.location.href = `${window.location.hash ? '#' : ''}/login`
                 })
             } else {
                 Message.error(status + ' ' + (message || statusText))
