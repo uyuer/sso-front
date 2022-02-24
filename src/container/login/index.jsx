@@ -74,19 +74,7 @@ export default function Login(props) {
             setLoading(false);
         })
     };
-
-    useEffect(() => {
-        let urlParams = new URLSearchParams(window.location.search);
-        let serviceURL = urlParams.get('serviceURL');
-        service.sso.doLogin({ serviceURL }).then(function (response) {
-            loggedChange(true)
-            let { data } = response;
-            data && (window.location.href = data)
-        }).catch(function (error) {
-            loggedChange(false)
-        });
-    }, [loggedChange])
-
+    
     return (
         <div className={styles.container}>
             <div className={styles.content}>
