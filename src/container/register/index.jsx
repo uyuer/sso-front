@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Input, Message, Form, Radio, Button } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import CryptoJS from 'crypto-js';
@@ -41,12 +41,9 @@ const tailLayout = {
 export default function Register(props) {
     const formInstance = useRef();
     const [count, setCount] = useState(59);
-    const [sending, setSending] = useState(false);
     const [start, setStart] = useState(false);
+    const [sending, setSending] = useState(false);
     const [loading, setLoading] = useState(false);
-    // useEffect(() => {
-    //     document.body.style.background = 'red'
-    // }, [])
     // 发送验证码
     async function sendCodeHandle(e) {
         let { validateFields } = formInstance.current;
@@ -54,23 +51,11 @@ export default function Register(props) {
         // setFieldsValue({ code: undefined })
         if (sending) return;
         setSending(true)
-        service.ordinary.sendCode(field).then(data => {
-            console.log(data, 'register-用户注册->发送验证码') // 只返回response中的data;
+        service.sso.sendRegCode(field).then(data => {
             if (data) {
                 Message.success('邮件已发送,30分钟以内有效')
                 setSending(false)
                 setStart(true)
-                down(count, (count) => {
-                    if (count >= 0) {
-                        setCount(count)
-                    }
-                    if (count <= 0) {
-                        setTimeout(() => {
-                            setCount(59)
-                            setStart(false)
-                        }, 1000)
-                    }
-                })
             }
         }).finally(() => {
             setSending(false)
@@ -78,23 +63,21 @@ export default function Register(props) {
     }
     // 点击注册执行操作
     async function handleSubmit(value) {
-        console.log(CryptoJS.SHA256('123456', '123456').toString())
-        let { username, password, repassword, male, email, code } = value;
-        if (password !== repassword) {
+        let { username, password, rePassword, male, email, code } = value;
+        if (password !== rePassword) {
             return Message.info('两次密码输入不一致')
         }
         let params = {
             username,
             password: CryptoJS.SHA256(password, password).toString(),
-            repassword: CryptoJS.SHA256(repassword, repassword).toString(),
+            rePassword: CryptoJS.SHA256(rePassword, rePassword).toString(),
             male,
             email, code
         }
         if (loading) return;
         setLoading(true);
-        service.ordinary.register(params)
+        service.sso.register(params)
             .then(data => {
-                console.log(data, 'register-用户注册->请求结果') // 只返回response中的data;
                 if (data) {
                     Message.success('注册成功')
                     window.localStorage.setItem('user', JSON.stringify({ username, email }))
@@ -110,32 +93,19 @@ export default function Register(props) {
         console.log(errorInfo);
     }
 
-    // 倒计时自减
-    const down = useCallback(() => {
-        const fn = function (count, fn) {
-            if (count <= 0) return;
-            setTimeout(() => {
-                count--;
-                fn(count)
-                fn(count, fn)
-            }, 1000)
-        }
-        return fn;
-    }, [count])
-    // function down(count, fn) {
-    //     if (count <= 0) return;
-    //     setTimeout(() => {
-    //         count--;
-    //         fn(count)
-    //         down(count, fn)
-    //     }, 1000)
-    // }
-
     useEffect(() => {
         if (start) {
-            down(count, setCount)
+            let c = count - 1;
+            if (c < 0) {
+                setCount(59)
+                setStart(false)
+                return
+            }
+            setTimeout(() => {
+                setCount(c)
+            }, 1000)
         }
-    }, [start, down, count])
+    }, [start, count])
 
     return (
         <div className={styles.container}>
@@ -149,7 +119,7 @@ export default function Register(props) {
                             // email: '271654537@qq.com',
                             // username: 'test005',
                             // password: '123456',
-                            // repassword: '123456',
+                            // rePassword: '123456',
                             male: '2'
                         }}
                         ref={formInstance}
@@ -188,7 +158,7 @@ export default function Register(props) {
                         </Form.Item>
                         <Form.Item
                             label={'重复密码'}
-                            name="repassword"
+                            name="rePassword"
                             rules={[
                                 { required: true, message: '请输入' },
                             ]}
